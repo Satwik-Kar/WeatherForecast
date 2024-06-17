@@ -41,11 +41,7 @@
 }
 
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
-}
+
 
 .App-header {
 
@@ -69,13 +65,26 @@
     color: #61dafb;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+
+
+.windmill-div {
+    justify-content: center;
+    display: flex;flex:1;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+}
+
+.propeller {
+    width: 100px;
+    height: 100px;
+}
+
+.windmill-pole {
+    width: 10px;
+    height: 100px;
+    background-color: white;
+    border-radius: 10px;
 }
 
 .list-item-row {

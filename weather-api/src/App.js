@@ -1,6 +1,6 @@
 import './App.css';
-import {useState} from "react";
-import {useSpring,animated} from "react-spring";
+import {useEffect, useState} from "react";
+import {animated, useSpring} from "react-spring";
 
 
 function App() {
@@ -10,9 +10,12 @@ function App() {
     const FAHRENHEIT = 'f'
     const CELSIUS = 'c'
     const [degree, setDegree] = useState('c');
-    const mostlyCloudy = require('./assets/Cloudy.png');
-    const partlyCloudy = require('./assets/Partly Cloudy.png');
-    const thunderStorm = require('./assets/Thunderstorms.png');
+    const propeller = require('./assets/propeller.png');
+    const[speed,setSpeed] = useState(0);
+    const[windDirection,setWindDirection] = useState('');
+
+
+    const [colorString, setColorString] = useState('white');
 
     function fetchWeatherByLocation() {
         if (!navigator.geolocation) {
@@ -79,6 +82,20 @@ function App() {
 
             setResult(data)
             setDegree(degree)
+            const number = Number(data?.current_observation.condition.temperature);
+            if (number > 32 && number < 36) {
+
+                setColorString('orange');
+            } else if (number > 36) {
+                setColorString('red');
+            } else if (number < 32) {
+                setColorString('white');
+
+            }
+            const speed = data?.current_observation.wind.speed;
+            setSpeed(speed);
+            const wD = data?.current_observation.wind.direction;
+            setWindDirection(wD);
         }).catch(err => {
 
             console.error('There was a problem with the fetch operation:', err);
@@ -119,31 +136,45 @@ function App() {
 
 
     }
-    const getImageSource = (text) => {
-        if (text === 'mostly-clouds') {
-            return mostlyCloudy;
 
-        } else if (text === 'partly-clouds') {
-
-            return partlyCloudy;
-
-        } else if (text === 'thunderstorm') {
-            return thunderStorm;
-        }
-
-    }
-    function Number({n}) {
+    function AnimatedNumber({n, colorString}) {
         const {number} = useSpring({
 
-            from:{number:0},
+            from: {number: 0},
             number: n,
-            delay:200,
-            config:{mass:1,tension:20,friction:10},
+            delay: 200,
+            config: {mass: 1, tension: 20, friction: 10},
 
         });
-        return <animated.div>{number.to((n)=>n.toFixed(0))}</animated.div>
+        return <animated.div style={{color: colorString}}>{number.to((n) => n.toFixed(0))}</animated.div>
 
     }
+
+    const Propeller = ({speed}) => {
+        const [rotation, setRotation] = useState(0);
+
+        const propellerAnimation = useSpring({
+           to: { transform: `rotateZ(${rotation}deg)` },
+            config: { duration: 1000 / speed },
+        });
+
+        useEffect(() => {
+            const interval = setInterval(() => {
+                setRotation(rot => rot + 360);
+            }, 1000 / speed);
+
+            return () => clearInterval(interval);
+        }, [speed]);
+        return (
+            <animated.img src={propeller} className={'propeller'}
+                          style={{
+                              ...propellerAnimation,transformOrigin: 'center center'
+                          }}
+
+            />
+        );
+    };
+
 
     return (
         <div className="App">
@@ -170,14 +201,38 @@ function App() {
 
                     {result && (<>
                             <h3>{result?.location.city}, {result?.location.country}</h3>
-                            <div style={{display: 'flex', gap: '10px'}}>
-                                <h1 style={{display: 'flex'}}>
-                                    <Number n = {result?.current_observation.condition.temperature}/> °{degree}
-                                </h1>
-                                <img style={{width: '100px', height: '100px'}}
-                                     src={require(`../src/assets/${result?.current_observation.condition.text}.png`)}/>
+                            <div style={{display: 'flex', gap: '200px'}}>
+                                <div style={{display: 'flex', flexDirection: 'row', gap: '30px'}}>
+                                    <div className={'windmill-div'}>
+                                        <Propeller speed={speed / 10}/>
 
-                                <h6>{result?.current_observation.condition.text}</h6>
+
+                                        <div className={'windmill-pole'}>
+
+
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3>Wind</h3>
+                                        <h4>{(speed * 1.60934).toFixed(0)} km/h</h4>
+                                        <h4>towards {windDirection}</h4>
+                                    </div>
+
+
+                                </div>
+
+                                <div style={{display: 'flex'}}>
+                                <h1 style={{display: 'flex', color: colorString}} id='temp'>
+                                        <AnimatedNumber n={result?.current_observation.condition.temperature}
+                                                        colorString={colorString}/> °{degree}
+                                    </h1>
+                                    <img style={{width: '100px', height: '100px'}}
+                                         src={require(`../src/assets/${result?.current_observation.condition.text}.png`)}/>
+
+                                    <h6>{result?.current_observation.condition.text}</h6>
+                                </div>
+
+
                             </div>
 
 
@@ -190,7 +245,7 @@ function App() {
                     <div className={'forecast-div'}>
 
 
-                        <h1 style={{alignSelf:'center' }} id={'for'}>Forecasts</h1>
+                        <h1 style={{alignSelf: 'center'}} id={'for'}>Forecasts</h1>
 
                         <ul style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
                             {result?.forecasts.map(item => (
@@ -207,8 +262,10 @@ function App() {
                                         }
                                     </div>
                                     <div className="details list-item-row">
-                                        <p style={{display:'flex',flex: 1}}><strong>High:</strong> <Number n={item.high}/>°{degree}</p>
-                                        <p style={{display:'flex',flex: 1}}><strong>Low:</strong> <Number n={item.low}/>°{degree}</p>
+                                        <p style={{display: 'flex', flex: 1}}><strong>High:</strong> <AnimatedNumber
+                                            n={item.high}/>°{degree}</p>
+                                        <p style={{display: 'flex', flex: 1}}><strong>Low:</strong> <AnimatedNumber
+                                            n={item.low}/>°{degree}</p>
                                         <p style={{flex: 1}}>{item.text}</p>
                                         <img style={{width: '100px', height: '100px', marginLeft: '10px'}}
                                              src={require(`../src/assets/${item.text}.png`)}/>
