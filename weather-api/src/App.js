@@ -1,5 +1,6 @@
 import './App.css';
 import {useState} from "react";
+import {useSpring,animated} from "react-spring";
 
 
 function App() {
@@ -131,11 +132,24 @@ function App() {
         }
 
     }
+    function Number({n}) {
+        const {number} = useSpring({
+
+            from:{number:0},
+            number: n,
+            delay:200,
+            config:{mass:1,tension:20,friction:10},
+
+        });
+        return <animated.div>{number.to((n)=>n.toFixed(0))}</animated.div>
+
+    }
+
     return (
         <div className="App">
             <header className="App-header">
                 <div className={'left-div'}>
-                    <h1>Enter your city</h1>
+                    <h3>Enter your city</h3>
 
                     <p className={'interactions'}>
                         <input id={'input-city'}/>
@@ -145,18 +159,21 @@ function App() {
 
                         }}>Get weather from current location
                         </button>
+                        <select className={'select'} onChange={onChange}>
+                            {options.map(option => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
+                                </option>
+                            ))}
+                        </select>
                     </p>
-                    <select className={'select'} onChange={onChange}>
-                        {options.map(option => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
+
                     {result && (<>
-                            <h3>{result?.location.city}</h3>
+                            <h3>{result?.location.city}, {result?.location.country}</h3>
                             <div style={{display: 'flex', gap: '10px'}}>
-                                <h1>{result?.current_observation.condition.temperature} °{degree}</h1>
+                                <h1 style={{display: 'flex'}}>
+                                    <Number n = {result?.current_observation.condition.temperature}/> °{degree}
+                                </h1>
                                 <img style={{width: '100px', height: '100px'}}
                                      src={require(`../src/assets/${result?.current_observation.condition.text}.png`)}/>
 
@@ -173,39 +190,39 @@ function App() {
                     <div className={'forecast-div'}>
 
 
-                    <h1 id={'for'}>Forecasts</h1>
+                        <h1 style={{alignSelf:'center' }} id={'for'}>Forecasts</h1>
 
-                    <ul style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
-                        {result?.forecasts.map(item => (
+                        <ul style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                            {result?.forecasts.map(item => (
 
-                            <li key={item.date} className={'list-item'}>
-
-
-                                <div className="day">{item.day}</div>
-                                <div className="date">
-                                    {
-                                        parseDate(item.date)
+                                <li key={item.date} className={'list-item'}>
 
 
-                                    }
-                                </div>
-                                <div className="details list-item-row">
-                                    <p style={{flex: 1}}><strong>High:</strong> {item.high}°{degree}</p>
-                                    <p style={{flex: 1}}><strong>Low:</strong> {item.low}°{degree}</p>
-                                    <p style={{flex: 1}}>{item.text}</p>
-                                    <img style={{width: '100px', height: '100px'}}
-                                         src={require(`../src/assets/${item.text}.png`)}/>
-                                </div>
+                                    <div className="day">{item.day}</div>
+                                    <div className="date">
+                                        {
+                                            parseDate(item.date)
 
 
-                            </li>
+                                        }
+                                    </div>
+                                    <div className="details list-item-row">
+                                        <p style={{display:'flex',flex: 1}}><strong>High:</strong> <Number n={item.high}/>°{degree}</p>
+                                        <p style={{display:'flex',flex: 1}}><strong>Low:</strong> <Number n={item.low}/>°{degree}</p>
+                                        <p style={{flex: 1}}>{item.text}</p>
+                                        <img style={{width: '100px', height: '100px', marginLeft: '10px'}}
+                                             src={require(`../src/assets/${item.text}.png`)}/>
+                                    </div>
 
 
-                        ))}
-                    </ul>
+                                </li>
 
 
-                </div>)}
+                            ))}
+                        </ul>
+
+
+                    </div>)}
 
 
             </header>
