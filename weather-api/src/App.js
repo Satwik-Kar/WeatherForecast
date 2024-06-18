@@ -17,8 +17,6 @@ function App() {
     const [speed, setSpeed] = useState(0);
     const [windDirection, setWindDirection] = useState('');
 
-    const [celciusValue, setCelciusValue] = useState(0);
-    const [fahrenheitValue, setFahrenheitValue] = useState(0);
 
     const [colorString, setColorString] = useState('white');
 
@@ -32,31 +30,6 @@ function App() {
 
             setLatitude(latitude);
             setLongitude(longitude);
-            const geocodingUrl = `http://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&appid=ac9c8b1df44a7385f94be73100a2b121`
-           const options = {
-            method: 'GET',
-
-        };
-            fetch(geocodingUrl,options)
-            .then(response => {
-                if (!response.ok) {
-                    console.error('Network response was not ok');
-                    setLoading(false);
-                }
-                return response.json();
-
-            }).then(data => {
-
-            setResultForecast(data)
-            setLoading(false);
-
-
-        }).catch(err => {
-
-            console.error('There was a problem with the fetch operation:', err);
-            setLoading(false);
-
-        });
             apiCallByLocation(longitude, latitude, degree);
 
         }, (err) => {
@@ -94,10 +67,9 @@ function App() {
             setResultForecast(data)
             setLoading(false);
 
-
         }).catch(err => {
 
-            console.error('There was a problem with the fetch operation:', err);
+            console.error('There was a problem with the forecast fetch operation:', err);
             setLoading(false);
 
         });
@@ -114,8 +86,6 @@ function App() {
             setResultWeather(data)
             setLoading(false);
             let celsius = Number(data?.main.temp) - 273.15;
-            let fah = Number((data?.main.temp - 273.15) * (9 / 5) + 32);
-
             if (celsius > 32 && celsius < 36) {
 
                 setColorString('orange');
@@ -131,7 +101,7 @@ function App() {
             setWindDirection(wD);
         }).catch(err => {
 
-            console.error('There was a problem with the fetch operation:', err);
+            console.error('There was a problem with the weather fetch operation:', err);
             setLoading(false);
 
         });
@@ -411,7 +381,7 @@ function App() {
                                             n={getChangedDegree(item.main.temp_min)}/>°{degree}</p>
                                         <p style={{flex: 1}}>{item.weather[0].main}</p>
                                         <img style={{width: '50px', height: '50px', marginLeft: '10px'}}
-                                             src={require(`../src/assets/${item.weather[0].main}.png`)}/>
+                                             src={require(`../src/assets/${item.weather[0].main}.png`)} alt={'weather condition'}/>
                                     </div>
 
 
