@@ -1,2 +1,2 @@
 # WeatherAPI
-a weather report mern application for getting weather realtime weather report from location
+a weather report mern application for getting realtime weather report from location
