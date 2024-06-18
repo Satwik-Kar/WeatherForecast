@@ -32,6 +32,31 @@ function App() {
 
             setLatitude(latitude);
             setLongitude(longitude);
+            const geocodingUrl = `http://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&appid=ac9c8b1df44a7385f94be73100a2b121`
+           const options = {
+            method: 'GET',
+
+        };
+            fetch(geocodingUrl,options)
+            .then(response => {
+                if (!response.ok) {
+                    console.error('Network response was not ok');
+                    setLoading(false);
+                }
+                return response.json();
+
+            }).then(data => {
+
+            setResultForecast(data)
+            setLoading(false);
+
+
+        }).catch(err => {
+
+            console.error('There was a problem with the fetch operation:', err);
+            setLoading(false);
+
+        });
             apiCallByLocation(longitude, latitude, degree);
 
         }, (err) => {
@@ -194,7 +219,7 @@ function App() {
         const [rotation, setRotation] = useState(0);
 
         const propellerAnimation = useSpring({
-            to: {transform: `rotateZ(${rotation}deg)`},
+            to: {transform: `rotate(${rotation}deg)`},
             config: {duration: 1000 / speed},
         });
 
@@ -276,11 +301,10 @@ function App() {
         <div className="App">
             <header className="App-header">
                 <div className={'left-div'}>
-                    <h3>Enter your city</h3>
+
 
                     <p className={'interactions'}>
-                        <input id={'input-city'}/>
-                        <h6>or</h6>
+
                         <button className="lo-btn" onClick={() => {
                             fetchWeatherByLocation()
 
