@@ -1,3 +1,17 @@
+.lo-btn {
+    width: 200px;
+    height: 40px;
+    border-radius: 20px;
+    border: none;
+    align-self: center;
+}
+
+.lo-btn:hover {
+    cursor: pointer;
+    background: linear-gradient(45deg, #f3eb5b, #fff);
+    color: #000;
+
+}
 
 .left-div {
     flex: 1;
@@ -41,8 +55,6 @@
 }
 
 
-
-
 .App-header {
 
     height: 100vh;
@@ -66,10 +78,10 @@
 }
 
 
-
 .windmill-div {
     justify-content: center;
-    display: flex;flex:1;
+    display: flex;
+    flex: 1;
     flex-direction: column;
     align-items: center;
     gap: 0;
@@ -78,11 +90,14 @@
 .propeller {
     width: 100px;
     height: 100px;
+    z-index: 1;
+    transform-origin: center center;
 }
 
 .windmill-pole {
-    width: 10px;
+    width: 12px;
     height: 100px;
+    transform: translateY(-50px);
     background-color: white;
     border-radius: 10px;
 }
@@ -128,13 +143,6 @@
     align-self: center;
 }
 
-#lo-btn {
-    width: 200px;
-    height: 40px;
-    border-radius: 20px;
-    border: none;
-    align-self: center;
-}
 
 #input-city {
     width: 200px;

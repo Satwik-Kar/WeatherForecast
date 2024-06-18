@@ -4,16 +4,21 @@ import {animated, useSpring} from "react-spring";
 
 
 function App() {
+    const [loading, setLoading] = useState(false);
     const [latitude, setLatitude] = useState(0);
     const [longitude, setLongitude] = useState(0);
-    const [result, setResult] = useState(null);
+    const [resultWeather, setResultWeather] = useState(null);
+    const [resultForecast, setResultForecast] = useState(null);
+
     const FAHRENHEIT = 'f'
     const CELSIUS = 'c'
-    const [degree, setDegree] = useState('c');
+    const [degree, setDegree] = useState(CELSIUS);
     const propeller = require('./assets/propeller.png');
-    const[speed,setSpeed] = useState(0);
-    const[windDirection,setWindDirection] = useState('');
+    const [speed, setSpeed] = useState(0);
+    const [windDirection, setWindDirection] = useState('');
 
+    const [celciusValue, setCelciusValue] = useState(0);
+    const [fahrenheitValue, setFahrenheitValue] = useState(0);
 
     const [colorString, setColorString] = useState('white');
 
@@ -39,82 +44,115 @@ function App() {
 
     }
 
-    async function apiCall() {
-        const url = 'https://yahoo-weather5.p.rapidapi.com/weather?location=sunnyvale&format=json&u=f';
+
+    function apiCallByLocation(longitude, latitude) {
+        setLoading(true);
+        const urlWeather = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=ac9c8b1df44a7385f94be73100a2b121`;
+        const urlForecast = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=ac9c8b1df44a7385f94be73100a2b121`;
+
         const options = {
             method: 'GET',
-            headers: {
-                'x-rapidapi-key': '08e1ab19d9msh129ebbd19f50f6bp161607jsn55ae4071c03e',
-                'x-rapidapi-host': 'yahoo-weather5.p.rapidapi.com'
-            }
-        };
 
-        try {
-            const response = await fetch(url, options);
-            const result = await response.json();
-            setResult(result)
-
-        } catch (error) {
-            console.error(error);
-        }
-
-    }
-
-    function apiCallByLocation(longitude, latitude, degree) {
-        const url = `https://yahoo-weather5.p.rapidapi.com/weather?lat=${latitude}&long=${longitude}&format=json&u=${degree}`;
-        const options = {
-            method: 'GET',
-            headers: {
-                'x-rapidapi-key': '08e1ab19d9msh129ebbd19f50f6bp161607jsn55ae4071c03e',
-                'x-rapidapi-host': 'yahoo-weather5.p.rapidapi.com'
-            }
         };
 
 
-        fetch(url, options)
+        fetch(urlForecast, options)
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    console.error('Network response was not ok');
+                    setLoading(false);
                 }
                 return response.json();
 
             }).then(data => {
 
-            setResult(data)
-            setDegree(degree)
-            const number = Number(data?.current_observation.condition.temperature);
-            if (number > 32 && number < 36) {
+            setResultForecast(data)
+            setLoading(false);
+
+
+        }).catch(err => {
+
+            console.error('There was a problem with the fetch operation:', err);
+            setLoading(false);
+
+        });
+        fetch(urlWeather, options)
+            .then(response => {
+                if (!response.ok) {
+                    console.error('Network response was not ok');
+                    setLoading(false);
+                }
+                return response.json();
+
+            }).then(data => {
+
+            setResultWeather(data)
+            setLoading(false);
+            let celsius = Number(data?.main.temp) - 273.15;
+            let fah = Number((data?.main.temp - 273.15) * (9 / 5) + 32);
+
+            if (celsius > 32 && celsius < 36) {
 
                 setColorString('orange');
-            } else if (number > 36) {
+            } else if (celsius > 36) {
                 setColorString('red');
-            } else if (number < 32) {
+            } else if (celsius < 32) {
                 setColorString('white');
 
             }
-            const speed = data?.current_observation.wind.speed;
+            const speed = data?.wind.speed;
             setSpeed(speed);
-            const wD = data?.current_observation.wind.direction;
+            const wD = getWindDirection(data?.wind.deg);
             setWindDirection(wD);
         }).catch(err => {
 
             console.error('There was a problem with the fetch operation:', err);
+            setLoading(false);
 
         });
 
 
     }
 
-    function parseDate(unix) {
-        let milliseconds = unix * 1000;
+    function parseDate(timestamp) {
 
-        let date = new Date(milliseconds);
 
-        let year = date.getFullYear();
-        let month = ('0' + (date.getMonth() + 1)).slice(-2);
-        let day = ('0' + date.getDate()).slice(-2);
+        let date = new Date(timestamp);
 
-        return `${day}-${month}-${year}`;
+        return date.toLocaleDateString('en-IN');
+    }
+
+    function parseTime(timestamp) {
+        let date = new Date(timestamp);
+
+        let hours = date.getHours();
+        let minutes = date.getMinutes();
+
+
+        let formattedHours = hours < 10 ? `0${hours}` : hours;
+        let formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+
+
+        let period = hours >= 12 ? 'PM' : 'AM';
+
+
+        if (hours > 12) {
+            formattedHours -= 12;
+        } else if (hours === 0) {
+            formattedHours = 12;
+        }
+
+        return `${formattedHours}:${formattedMinutes} ${period}`;
+    }
+
+    function getDayFromDate(timestamp) {
+
+
+        let days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        let date = new Date(timestamp);
+        return days[date.getDay()];
+
+
     }
 
     const options = [
@@ -126,11 +164,13 @@ function App() {
     const onChange = (selected) => {
         if (selected.target.value === CELSIUS) {
 
-            apiCallByLocation(longitude, latitude, 'c');
+            setDegree(CELSIUS);
+
         } else if (selected.target.value === FAHRENHEIT) {
 
 
-            apiCallByLocation(longitude, latitude, 'f');
+            setDegree(FAHRENHEIT);
+
 
         }
 
@@ -154,8 +194,8 @@ function App() {
         const [rotation, setRotation] = useState(0);
 
         const propellerAnimation = useSpring({
-           to: { transform: `rotateZ(${rotation}deg)` },
-            config: { duration: 1000 / speed },
+            to: {transform: `rotateZ(${rotation}deg)`},
+            config: {duration: 1000 / speed},
         });
 
         useEffect(() => {
@@ -168,12 +208,68 @@ function App() {
         return (
             <animated.img src={propeller} className={'propeller'}
                           style={{
-                              ...propellerAnimation,transformOrigin: 'center center'
+                              ...propellerAnimation
                           }}
 
             />
         );
     };
+
+    function getChangedDegree(value) {
+        let number = -1
+
+        if (degree === CELSIUS) {
+
+            number = Number(value) - 273.15;
+
+
+        } else if (degree === FAHRENHEIT) {
+
+            number = (Number(value) - 273.15) * (9 / 5) + 32;
+
+        }
+        return number;
+
+    }
+
+    function getWindDirection(degree) {
+
+        degree = degree % 360;
+        if (degree < 0) {
+            degree += 360;
+        }
+
+
+        const directions = [
+            {name: "North", min: 0, max: 11.25},
+            {name: "North-Northeast", min: 11.25, max: 33.75},
+            {name: "Northeast", min: 33.75, max: 56.25},
+            {name: "East-Northeast", min: 56.25, max: 78.75},
+            {name: "East", min: 78.75, max: 101.25},
+            {name: "East-Southeast", min: 101.25, max: 123.75},
+            {name: "Southeast", min: 123.75, max: 146.25},
+            {name: "South-Southeast", min: 146.25, max: 168.75},
+            {name: "South", min: 168.75, max: 191.25},
+            {name: "South-Southwest", min: 191.25, max: 213.75},
+            {name: "Southwest", min: 213.75, max: 236.25},
+            {name: "West-Southwest", min: 236.25, max: 258.75},
+            {name: "West", min: 258.75, max: 281.25},
+            {name: "West-Northwest", min: 281.25, max: 303.75},
+            {name: "Northwest", min: 303.75, max: 326.25},
+            {name: "North-Northwest", min: 326.25, max: 348.75},
+            {name: "North", min: 348.75, max: 360} // Handle wrap-around from 360 to 0
+        ];
+
+
+        for (let i = 0; i < directions.length; i++) {
+            if (degree >= directions[i].min && degree < directions[i].max) {
+                return directions[i].name;
+            }
+        }
+
+
+        return "Unknown";
+    }
 
 
     return (
@@ -184,11 +280,11 @@ function App() {
 
                     <p className={'interactions'}>
                         <input id={'input-city'}/>
-                        <text>or</text>
-                        <button id="lo-btn" onClick={() => {
+                        <h6>or</h6>
+                        <button className="lo-btn" onClick={() => {
                             fetchWeatherByLocation()
 
-                        }}>Get weather from current location
+                        }}>Fetch from current location
                         </button>
                         <select className={'select'} onChange={onChange}>
                             {options.map(option => (
@@ -198,9 +294,15 @@ function App() {
                             ))}
                         </select>
                     </p>
+                    {
+                        loading && (
+                            <img style={{width: '100px', height: '100px'}} src={require('../src/assets/loading.gif')}
+                                 alt='loader'/>
+                        )
+                    }
 
-                    {result && (<>
-                            <h3>{result?.location.city}, {result?.location.country}</h3>
+                    {resultWeather && (<>
+                            <h3>{resultWeather?.name}, {resultWeather?.sys.country}</h3>
                             <div style={{display: 'flex', gap: '200px'}}>
                                 <div style={{display: 'flex', flexDirection: 'row', gap: '30px'}}>
                                     <div className={'windmill-div'}>
@@ -215,21 +317,31 @@ function App() {
                                     <div>
                                         <h3>Wind</h3>
                                         <h4>{(speed * 1.60934).toFixed(0)} km/h</h4>
-                                        <h4>towards {windDirection}</h4>
+                                        <h4>from {windDirection}</h4>
                                     </div>
 
 
                                 </div>
 
-                                <div style={{display: 'flex'}}>
-                                <h1 style={{display: 'flex', color: colorString}} id='temp'>
-                                        <AnimatedNumber n={result?.current_observation.condition.temperature}
-                                                        colorString={colorString}/> °{degree}
-                                    </h1>
-                                    <img style={{width: '100px', height: '100px'}}
-                                         src={require(`../src/assets/${result?.current_observation.condition.text}.png`)}/>
+                                <div style={{display: 'flex', alignItems: 'center'}}>
+                                    <h1 style={{display: 'flex', color: colorString, margin: 30}} id='temp'>
+                                        {degree === CELSIUS ? (
+                                            <AnimatedNumber n={getChangedDegree(resultWeather?.main.temp)}
+                                                            colorString={colorString}/>
 
-                                    <h6>{result?.current_observation.condition.text}</h6>
+                                        ) : (
+                                            <AnimatedNumber n={getChangedDegree(resultWeather?.main.temp)}
+                                                            colorString={colorString}/>
+
+                                        )
+                                        }
+
+                                        °{degree}
+                                    </h1>
+                                    <img style={{width: '50px', height: '50px'}}
+                                         src={require(`../src/assets/${resultWeather?.weather[0].main}.png`)}/>
+
+                                    <h6>{resultWeather?.weather[0].main}</h6>
                                 </div>
 
 
@@ -241,34 +353,41 @@ function App() {
                 </div>
 
 
-                {result && (
+                {resultForecast && (
                     <div className={'forecast-div'}>
 
 
                         <h1 style={{alignSelf: 'center'}} id={'for'}>Forecasts</h1>
 
                         <ul style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
-                            {result?.forecasts.map(item => (
+                            {resultForecast?.list.map(item => (
 
-                                <li key={item.date} className={'list-item'}>
+                                <li key={item.dt} className={'list-item'}>
 
 
-                                    <div className="day">{item.day}</div>
+                                    <div className="day">{getDayFromDate(item.dt_txt)}</div>
                                     <div className="date">
                                         {
-                                            parseDate(item.date)
+                                            parseDate(item.dt_txt)
+
+
+                                        }
+                                    </div>
+                                    <div className="time">
+                                        {
+                                            parseTime(item.dt_txt)
 
 
                                         }
                                     </div>
                                     <div className="details list-item-row">
                                         <p style={{display: 'flex', flex: 1}}><strong>High:</strong> <AnimatedNumber
-                                            n={item.high}/>°{degree}</p>
+                                            n={getChangedDegree(item.main.temp_max)}/>°{degree}</p>
                                         <p style={{display: 'flex', flex: 1}}><strong>Low:</strong> <AnimatedNumber
-                                            n={item.low}/>°{degree}</p>
-                                        <p style={{flex: 1}}>{item.text}</p>
-                                        <img style={{width: '100px', height: '100px', marginLeft: '10px'}}
-                                             src={require(`../src/assets/${item.text}.png`)}/>
+                                            n={getChangedDegree(item.main.temp_min)}/>°{degree}</p>
+                                        <p style={{flex: 1}}>{item.weather[0].main}</p>
+                                        <img style={{width: '50px', height: '50px', marginLeft: '10px'}}
+                                             src={require(`../src/assets/${item.weather[0].main}.png`)}/>
                                     </div>
 
 
