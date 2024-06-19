@@ -15,16 +15,17 @@ function App() {
     const propeller = require('./assets/propeller.png');
     const [speed, setSpeed] = useState(0);
     const [windDirection, setWindDirection] = useState('');
-
+    const [groupedArray, setGroupedArray] = useState(null);
 
     const [colorString, setColorString] = useState('white');
-    function setStatusIdentifier(color){
+
+    function setStatusIdentifier(color) {
         const div = document.getElementById('status');
-        if (color === 'green'){
+        if (color === 'green') {
             div.style.backgroundColor = '#6BEC66FF'
             div.style.border = '9px solid #214A20FF';
 
-        }else if(color === 'red'){
+        } else if (color === 'red') {
             div.style.backgroundColor = '#EA6565FF'
             div.style.border = '9px solid #512222FF';
         }
@@ -75,6 +76,26 @@ function App() {
             }).then(data => {
 
             setResultForecast(data)
+            const {list} = data;
+
+            const groupedByDate = list.reduce((acc, item) => {
+                const date = new Date(item.dt * 1000).toDateString();
+                if (!acc[date]) {
+                    acc[date] = {
+                        date,
+                        times: [],
+                    };
+                }
+                acc[date].times.push({
+                    time: new Date(item.dt * 1000).toLocaleTimeString(),
+                    data: item,
+                });
+                return acc;
+            }, {});
+
+            const groupedArray = Object.values(groupedByDate);
+            setGroupedArray(groupedArray);
+            console.log(groupedArray);
             setLoading(false);
 
         }).catch(err => {
@@ -113,7 +134,7 @@ function App() {
             setSpeed(speed);
             const wD = getWindDirection(data?.wind.deg);
             setWindDirection(wD);
-            console.log(data)
+
         }).catch(err => {
 
             console.error('There was a problem with the weather fetch operation:', err);
@@ -318,7 +339,7 @@ function App() {
                     }
 
                     {resultWeather && (<>
-                            <h3>{resultWeather?.name}, {resultWeather?.sys.country}</h3>
+                            <h4>{resultWeather?.name}, {resultWeather?.sys.country}</h4>
                             <div style={{display: 'flex', gap: '50px', padding: 10}}>
                                 <div style={{display: 'flex', flexDirection: 'row', gap: '30px'}}>
                                     <div className={'windmill-div'}>
@@ -332,8 +353,8 @@ function App() {
                                     </div>
                                     <div>
                                         <h3>Wind</h3>
-                                        <h4>{(speed * 1.60934).toFixed(0)} km/h</h4>
-                                        <h4>from {windDirection}</h4>
+                                        <h5>{(speed * 1.60934).toFixed(0)} km/h</h5>
+                                        <h5>from {windDirection}</h5>
                                     </div>
 
 
@@ -365,18 +386,18 @@ function App() {
                                     <div className={'weather-variables-item'}>
                                         <img style={{width: '50px', height: '50px'}}
                                              src={require('../src/assets/atmospheric.png')}/>
-                                        <h4>Pressure • {resultWeather?.main.pressure} hPa</h4>
+                                        <h6>Pressure • {resultWeather?.main.pressure} hPa</h6>
                                     </div>
                                     <div className={'weather-variables-item'}>
                                         <img style={{width: '50px', height: '50px'}}
                                              src={require('../src/assets/humidity.png')}/>
-                                        <h4>Humidity • {resultWeather?.main.humidity} %</h4>
+                                        <h6>Humidity • {resultWeather?.main.humidity} %</h6>
                                     </div>
                                     <div className={'weather-variables-item'}>
                                         <img style={{width: '50px', height: '50px'}}
                                              src={require('../src/assets/temperature.png')}/>
-                                        <h4>Feels Like
-                                            • {getChangedDegree(resultWeather?.main.feels_like).toFixed(1)} °{degree}</h4>
+                                        <h6>Feels Like
+                                            • {getChangedDegree(resultWeather?.main.feels_like).toFixed(1)} °{degree}</h6>
 
                                     </div>
 
@@ -395,39 +416,49 @@ function App() {
                     <div className={'forecast-div'}>
 
 
-                        <h1 style={{alignSelf: 'center'}} id={'for'}>Forecasts</h1>
+                        <h3 style={{alignSelf: 'center'}} id={'for'}>Forecasts</h3>
 
-                        <ul style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
-                            {resultForecast?.list.map(item => (
+                        <ul className={'flexCol'}>
+                            {groupedArray?.map(item => (
 
-                                <li key={item.dt} className={'list-item'}>
+                                <li className={'list-item'}>
+                                    <div className={'list-item-date'}>
+                                        <div className="day">{getDayFromDate(item.date)}</div>
+                                        <div className="date">
+                                            {
+                                                parseDate(item.date)
 
 
-                                    <div className="day">{getDayFromDate(item.dt_txt)}</div>
-                                    <div className="date">
-                                        {
-                                            parseDate(item.dt_txt)
-
-
-                                        }
+                                            }
+                                        </div>
                                     </div>
-                                    <div className="time">
-                                        {
-                                            parseTime(item.dt_txt)
 
 
-                                        }
-                                    </div>
-                                    <div className="details list-item-row">
-                                        <p style={{display: 'flex', flex: 1}}><strong>High:</strong> <AnimatedNumber
-                                            n={getChangedDegree(item.main.temp_max)}/>°{degree}</p>
-                                        <p style={{display: 'flex', flex: 1}}><strong>Low:</strong> <AnimatedNumber
-                                            n={getChangedDegree(item.main.temp_min)}/>°{degree}</p>
-                                        <p style={{flex: 1}}>{item.weather[0].main}</p>
-                                        <img style={{width: '50px', height: '50px', marginLeft: '10px'}}
-                                             src={require(`../src/assets/${item.weather[0].main}.png`)}
-                                             alt={'weather condition'}/>
-                                    </div>
+                                    {item.times.map(time => (
+                                        <div className={'times'}>
+
+                                            <div className="time">
+                                                {
+                                                    time.time
+
+
+                                                }
+                                            </div>
+                                            <div className="details list-item-row">
+                                                <h5 style={{display: 'flex', flex: 1}}><strong>High:</strong>
+                                                    <AnimatedNumber
+                                                        n={getChangedDegree(time.data.main.temp_max)}/>°{degree}</h5>
+                                                <h5 style={{display: 'flex', flex: 1}}><strong>Low:</strong>
+                                                    <AnimatedNumber
+                                                        n={getChangedDegree(time.data.main.temp_min)}/>°{degree}</h5>
+                                                <h5 style={{flex: 1}}>{time.data.weather[0].main}</h5>
+                                                <img style={{width: '50px', height: '50px', marginLeft: '10px'}}
+                                                     src={require(`../src/assets/${time.data.weather[0].main}.png`)}
+                                                     alt={'weather condition'}/>
+                                            </div>
+                                        </div>
+
+                                    ))}
 
 
                                 </li>
@@ -443,7 +474,8 @@ function App() {
             </header>
 
         </div>
-    );
+    )
+        ;
 }
 
 export default App;
