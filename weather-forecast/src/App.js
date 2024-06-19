@@ -9,7 +9,6 @@ function App() {
     const [longitude, setLongitude] = useState(0);
     const [resultWeather, setResultWeather] = useState(null);
     const [resultForecast, setResultForecast] = useState(null);
-
     const FAHRENHEIT = 'f'
     const CELSIUS = 'c'
     const [degree, setDegree] = useState(CELSIUS);
@@ -19,6 +18,17 @@ function App() {
 
 
     const [colorString, setColorString] = useState('white');
+    function setStatusIdentifier(color){
+        const div = document.getElementById('status');
+        if (color === 'green'){
+            div.style.backgroundColor = '#6BEC66FF'
+            div.style.border = '9px solid #214A20FF';
+
+        }else if(color === 'red'){
+            div.style.backgroundColor = '#EA6565FF'
+            div.style.border = '9px solid #512222FF';
+        }
+    }
 
     function fetchWeatherByLocation() {
         if (!navigator.geolocation) {
@@ -78,12 +88,16 @@ function App() {
                 if (!response.ok) {
                     console.error('Network response was not ok');
                     setLoading(false);
+                    setStatusIdentifier('red');
+
                 }
                 return response.json();
 
             }).then(data => {
 
             setResultWeather(data)
+            setStatusIdentifier('green');
+
             setLoading(false);
             let celsius = Number(data?.main.temp) - 273.15;
             if (celsius > 32 && celsius < 36) {
@@ -99,9 +113,12 @@ function App() {
             setSpeed(speed);
             const wD = getWindDirection(data?.wind.deg);
             setWindDirection(wD);
+            console.log(data)
         }).catch(err => {
 
             console.error('There was a problem with the weather fetch operation:', err);
+            setStatusIdentifier('red');
+
             setLoading(false);
 
         });
@@ -252,7 +269,7 @@ function App() {
             {name: "West-Northwest", min: 281.25, max: 303.75},
             {name: "Northwest", min: 303.75, max: 326.25},
             {name: "North-Northwest", min: 326.25, max: 348.75},
-            {name: "North", min: 348.75, max: 360} // Handle wrap-around from 360 to 0
+            {name: "North", min: 348.75, max: 360}
         ];
 
 
@@ -269,14 +286,19 @@ function App() {
 
     return (
         <div className="App">
+
             <header className="App-header">
-                <div className={'left-div'}>
+
+                <div className={'left-weather-div'}>
+                    <div className={'status-container'}>
+                        <div id={'status'}></div>
+                    </div>
 
 
                     <p className={'interactions'}>
 
                         <button className="lo-btn" onClick={() => {
-                            fetchWeatherByLocation()
+                            fetchWeatherByLocation();
 
                         }}>Fetch from current location
                         </button>
@@ -297,7 +319,7 @@ function App() {
 
                     {resultWeather && (<>
                             <h3>{resultWeather?.name}, {resultWeather?.sys.country}</h3>
-                            <div style={{display: 'flex', gap: '200px'}}>
+                            <div style={{display: 'flex', gap: '50px', padding: 10}}>
                                 <div style={{display: 'flex', flexDirection: 'row', gap: '30px'}}>
                                     <div className={'windmill-div'}>
                                         <Propeller speed={speed / 10}/>
@@ -317,7 +339,7 @@ function App() {
 
                                 </div>
 
-                                <div style={{display: 'flex', alignItems: 'center'}}>
+                                <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                                     <h1 style={{display: 'flex', color: colorString, margin: 30}} id='temp'>
                                         {degree === CELSIUS ? (
                                             <AnimatedNumber n={getChangedDegree(resultWeather?.main.temp)}
@@ -336,8 +358,30 @@ function App() {
                                          src={require(`../src/assets/${resultWeather?.weather[0].main}.png`)}/>
 
                                     <h6>{resultWeather?.weather[0].main}</h6>
-                                </div>
 
+
+                                </div>
+                                <div className={'weather-variables'}>
+                                    <div className={'weather-variables-item'}>
+                                        <img style={{width: '50px', height: '50px'}}
+                                             src={require('../src/assets/atmospheric.png')}/>
+                                        <h4>Pressure • {resultWeather?.main.pressure} hPa</h4>
+                                    </div>
+                                    <div className={'weather-variables-item'}>
+                                        <img style={{width: '50px', height: '50px'}}
+                                             src={require('../src/assets/humidity.png')}/>
+                                        <h4>Humidity • {resultWeather?.main.humidity} %</h4>
+                                    </div>
+                                    <div className={'weather-variables-item'}>
+                                        <img style={{width: '50px', height: '50px'}}
+                                             src={require('../src/assets/temperature.png')}/>
+                                        <h4>Feels Like
+                                            • {getChangedDegree(resultWeather?.main.feels_like).toFixed(1)} °{degree}</h4>
+
+                                    </div>
+
+
+                                </div>
 
                             </div>
 
@@ -381,7 +425,8 @@ function App() {
                                             n={getChangedDegree(item.main.temp_min)}/>°{degree}</p>
                                         <p style={{flex: 1}}>{item.weather[0].main}</p>
                                         <img style={{width: '50px', height: '50px', marginLeft: '10px'}}
-                                             src={require(`../src/assets/${item.weather[0].main}.png`)} alt={'weather condition'}/>
+                                             src={require(`../src/assets/${item.weather[0].main}.png`)}
+                                             alt={'weather condition'}/>
                                     </div>
 
 
