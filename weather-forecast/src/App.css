@@ -49,6 +49,7 @@
     display: flex;
     flex-direction: column;
 
+    backdrop-filter: blur(14px);
 
     align-items: center;
     justify-content: center;
@@ -60,7 +61,7 @@
 .forecast-div {
     flex: 1;
 
-
+    backdrop-filter: blur(14px);
     display: flex;
     flex-direction: column;
     overflow-y: scroll;
@@ -70,16 +71,54 @@
     /*background-color: rgba(232, 62, 62, 0.34);*/
 }
 
+.info {
+    display: flex;
+    gap: 50px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.26);
+    border-radius: 20px;
+}
+
 .forecast-div::-webkit-scrollbar {
     display: none;
 }
 
-.App {
-    text-align: center;
-    padding: 2px;
-    background-color: #000000;
+.wind-div {
+    padding: 20px;
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+
 }
 
+.temp-div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+}
+
+.App {
+    text-align: center;
+
+    height: 100vh;
+    color: white;
+    font-weight: 900;
+
+    display: flex;
+    flex-direction: column;
+
+
+    font-size: 24px;
+}
+
+.bg-img {
+    position: absolute;
+    object-fit: cover;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+}
 
 .App-logo {
     height: 40vmin;
@@ -87,23 +126,17 @@
 }
 
 
-.App-header {
-
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-
-
-    font-size: 25px;
-    color: white;
-}
-
 @media screen and (min-width: 1200px) {
-    .App-header {
+    .App {
         flex-direction: row;
     }
 }
 
+.city-name {
+    background: #90796c;
+    padding: 20px;
+    border-radius: 20px;
+}
 
 .App-link {
     color: #61dafb;
@@ -140,7 +173,7 @@
     padding: 2px;
 
     gap: 13px;
-    color: antiquewhite;
+    color: white;
     align-items: center;
     justify-content: center;
 
@@ -165,9 +198,11 @@
 
     gap: 5px;
     align-self: center;
+    font-weight: 900;
 
-    color: antiquewhite;
+    color: white;
     align-items: center;
+
 
     width: 860px;
     height: 100%
@@ -196,11 +231,10 @@
 .times {
     display: flex;
 
-    border-radius: 10px;
-    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
 
+    border: white 1px solid;
 
-    backdrop-filter: blur(10px);
 
     width: 100%;
     height: 100%;

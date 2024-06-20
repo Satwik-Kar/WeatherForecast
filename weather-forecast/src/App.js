@@ -18,7 +18,7 @@ function App() {
     const [groupedArray, setGroupedArray] = useState(null);
 
     const [colorString, setColorString] = useState('white');
-
+    const [bg, setBg] = useState('');
     function setStatusIdentifier(color) {
         const div = document.getElementById('status');
         if (color === 'green') {
@@ -118,7 +118,7 @@ function App() {
 
             setResultWeather(data)
             setStatusIdentifier('green');
-
+            setBg(require(`../src/assets/bg/${data.weather[0].main}.jpg`))
             setLoading(false);
             let celsius = Number(data?.main.temp) - 273.15;
             if (celsius > 32 && celsius < 36) {
@@ -309,171 +309,169 @@ function App() {
 
     return (
         <div className="App">
-
-            <header className="App-header">
-
-                <div className={'left-weather-div'}>
-                    <div className={'status-container'}>
-                        <div id={'status'}></div>
-                    </div>
+            <img className={'bg-img'} src={bg}/>
 
 
-                    <p className={'interactions'}>
-
-                        <button className="lo-btn" onClick={() => {
-                            fetchWeatherByLocation();
-
-                        }}>Fetch from current location
-                        </button>
-                        <select className={'select'} onChange={onChange}>
-                            {options.map(option => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
-                    </p>
-                    {
-                        loading && (
-                            <img style={{width: '100px', height: '100px'}} src={require('../src/assets/loading.gif')}
-                                 alt='loader'/>
-                        )
-                    }
-
-                    {resultWeather && (<>
-                            <h4>{resultWeather?.name}, {resultWeather?.sys.country}</h4>
-                            <div style={{display: 'flex', gap: '50px', padding: 10}}>
-                                <div style={{display: 'flex', flexDirection: 'row', gap: '30px'}}>
-                                    <div className={'windmill-div'}>
-                                        <Propeller speed={speed / 10}/>
-
-
-                                        <div className={'windmill-pole'}>
-
-
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h3>Wind</h3>
-                                        <h5>{(speed * 1.60934).toFixed(0)} km/h</h5>
-                                        <h5>from {windDirection}</h5>
-                                    </div>
-
-
-                                </div>
-
-                                <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                                    <h1 style={{display: 'flex', color: colorString, margin: 30}} id='temp'>
-                                        {degree === CELSIUS ? (
-                                            <AnimatedNumber n={getChangedDegree(resultWeather?.main.temp)}
-                                                            colorString={colorString}/>
-
-                                        ) : (
-                                            <AnimatedNumber n={getChangedDegree(resultWeather?.main.temp)}
-                                                            colorString={colorString}/>
-
-                                        )
-                                        }
-
-                                        °{degree}
-                                    </h1>
-                                    <img style={{width: '50px', height: '50px'}}
-                                         src={require(`../src/assets/${resultWeather?.weather[0].main}.png`)}/>
-
-                                    <h6>{resultWeather?.weather[0].main}</h6>
-
-
-                                </div>
-                                <div className={'weather-variables'}>
-                                    <div className={'weather-variables-item'}>
-                                        <img style={{width: '50px', height: '50px'}}
-                                             src={require('../src/assets/atmospheric.png')}/>
-                                        <h6>Pressure • {resultWeather?.main.pressure} hPa</h6>
-                                    </div>
-                                    <div className={'weather-variables-item'}>
-                                        <img style={{width: '50px', height: '50px'}}
-                                             src={require('../src/assets/humidity.png')}/>
-                                        <h6>Humidity • {resultWeather?.main.humidity} %</h6>
-                                    </div>
-                                    <div className={'weather-variables-item'}>
-                                        <img style={{width: '50px', height: '50px'}}
-                                             src={require('../src/assets/temperature.png')}/>
-                                        <h6>Feels Like
-                                            • {getChangedDegree(resultWeather?.main.feels_like).toFixed(1)} °{degree}</h6>
-
-                                    </div>
-
-
-                                </div>
-
-                            </div>
-
-
-                        </>
-                    )}
+            <div className={'left-weather-div'}>
+                <div className={'status-container'}>
+                    <div id={'status'}></div>
                 </div>
 
 
-                {resultForecast && (
-                    <div className={'forecast-div'}>
+                <p className={'interactions'}>
+
+                    <button className="lo-btn" onClick={() => {
+                        fetchWeatherByLocation();
+
+                    }}>Fetch from current location
+                    </button>
+                    <select className={'select'} onChange={onChange}>
+                        {options.map(option => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
+                </p>
+                {
+                    loading && (
+                        <img style={{width: '100px', height: '100px'}} src={require('../src/assets/loading.gif')}
+                             alt='loader'/>
+                    )
+                }
+
+                {resultWeather && (<>
+                        <h4 className={'city-name'}>{resultWeather?.name}, {resultWeather?.sys.country}</h4>
+                        <div className={'info'}>
+                            <div className={'wind-div'}>
+                                <div className={'windmill-div'}>
+                                    <Propeller speed={speed / 10}/>
 
 
-                        <h3 style={{alignSelf: 'center'}} id={'for'}>Forecasts</h3>
+                                    <div className={'windmill-pole'}>
 
-                        <ul className={'flexCol'}>
-                            {groupedArray?.map(item => (
 
-                                <li className={'list-item'}>
-                                    <div className={'list-item-date'}>
-                                        <div className="day">{getDayFromDate(item.date)}</div>
-                                        <div className="date">
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3>Wind</h3>
+                                    <h5>{(speed * 1.60934).toFixed(0)} km/h</h5>
+                                    <h5>from {windDirection}</h5>
+                                </div>
+
+
+                            </div>
+
+                            <div className={'temp-div'}>
+                                <h1 style={{display: 'flex', color: colorString, margin: 30}} id='temp'>
+                                    {degree === CELSIUS ? (
+                                        <AnimatedNumber n={getChangedDegree(resultWeather?.main.temp)}
+                                                        colorString={colorString}/>
+
+                                    ) : (
+                                        <AnimatedNumber n={getChangedDegree(resultWeather?.main.temp)}
+                                                        colorString={colorString}/>
+
+                                    )
+                                    }
+
+                                    °{degree}
+                                </h1>
+                                <img style={{width: '50px', height: '50px'}}
+                                     src={require(`../src/assets/${resultWeather?.weather[0].main}.png`)}/>
+
+                                <h6>{resultWeather?.weather[0].main}</h6>
+
+
+                            </div>
+                            <div className={'weather-variables'}>
+                                <div className={'weather-variables-item'}>
+                                    <img style={{width: '50px', height: '50px'}}
+                                         src={require('../src/assets/atmospheric.png')}/>
+                                    <h6>Pressure • {resultWeather?.main.pressure} hPa</h6>
+                                </div>
+                                <div className={'weather-variables-item'}>
+                                    <img style={{width: '50px', height: '50px'}}
+                                         src={require('../src/assets/humidity.png')}/>
+                                    <h6>Humidity • {resultWeather?.main.humidity} %</h6>
+                                </div>
+                                <div className={'weather-variables-item'}>
+                                    <img style={{width: '50px', height: '50px'}}
+                                         src={require('../src/assets/temperature.png')}/>
+                                    <h6>Feels Like
+                                        • {getChangedDegree(resultWeather?.main.feels_like).toFixed(1)} °{degree}</h6>
+
+                                </div>
+
+
+                            </div>
+
+                        </div>
+
+
+                    </>
+                )}
+            </div>
+
+
+            {resultForecast && (
+                <div className={'forecast-div'}>
+
+
+                    <h3 style={{alignSelf: 'center'}} id={'for'}>Forecasts</h3>
+
+                    <ul className={'flexCol'}>
+                        {groupedArray?.map(item => (
+
+                            <li className={'list-item'}>
+                                <div className={'list-item-date'}>
+                                    <div className="day">{getDayFromDate(item.date)}</div>
+                                    <div className="date">
+                                        {
+                                            parseDate(item.date)
+
+
+                                        }
+                                    </div>
+                                </div>
+
+
+                                {item.times.map(time => (
+                                    <div className={'times'}>
+
+                                        <div className="time">
                                             {
-                                                parseDate(item.date)
+                                                time.time
 
 
                                             }
                                         </div>
+                                        <div className="details list-item-row">
+                                            <h5 style={{display: 'flex', flex: 1}}><strong>High:</strong>
+                                                <AnimatedNumber
+                                                    n={getChangedDegree(time.data.main.temp_max)}/>°{degree}</h5>
+                                            <h5 style={{display: 'flex', flex: 1}}><strong>Low:</strong>
+                                                <AnimatedNumber
+                                                    n={getChangedDegree(time.data.main.temp_min)}/>°{degree}</h5>
+                                            <h5 style={{flex: 1}}>{time.data.weather[0].main}</h5>
+                                            <img style={{width: '50px', height: '50px', marginLeft: '10px'}}
+                                                 src={require(`../src/assets/${time.data.weather[0].main}.png`)}
+                                                 alt={'weather condition'}/>
+                                        </div>
                                     </div>
 
-
-                                    {item.times.map(time => (
-                                        <div className={'times'}>
-
-                                            <div className="time">
-                                                {
-                                                    time.time
+                                ))}
 
 
-                                                }
-                                            </div>
-                                            <div className="details list-item-row">
-                                                <h5 style={{display: 'flex', flex: 1}}><strong>High:</strong>
-                                                    <AnimatedNumber
-                                                        n={getChangedDegree(time.data.main.temp_max)}/>°{degree}</h5>
-                                                <h5 style={{display: 'flex', flex: 1}}><strong>Low:</strong>
-                                                    <AnimatedNumber
-                                                        n={getChangedDegree(time.data.main.temp_min)}/>°{degree}</h5>
-                                                <h5 style={{flex: 1}}>{time.data.weather[0].main}</h5>
-                                                <img style={{width: '50px', height: '50px', marginLeft: '10px'}}
-                                                     src={require(`../src/assets/${time.data.weather[0].main}.png`)}
-                                                     alt={'weather condition'}/>
-                                            </div>
-                                        </div>
-
-                                    ))}
+                            </li>
 
 
-                                </li>
+                        ))}
+                    </ul>
 
 
-                            ))}
-                        </ul>
+                </div>)}
 
-
-                    </div>)}
-
-
-            </header>
 
         </div>
     )
