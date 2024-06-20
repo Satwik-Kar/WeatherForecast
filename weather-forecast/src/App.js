@@ -126,9 +126,11 @@ function App() {
                 setColorString('orange');
             } else if (celsius > 36) {
                 setColorString('red');
-            } else if (celsius < 32) {
-                setColorString('white');
+            } else if (celsius < 32 && celsius > 25) {
+                setColorString('green');
 
+            } else if (celsius < 25) {
+                setColorString('blue');
             }
             const speed = data?.wind.speed;
             setSpeed(speed);
