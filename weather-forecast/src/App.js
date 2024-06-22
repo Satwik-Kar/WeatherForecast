@@ -118,6 +118,7 @@ function App() {
 
             setResultWeather(data)
             setStatusIdentifier('green');
+            document.getElementById('appId').style.backgroundColor = 'transparent'
             setBg(require(`../src/assets/bg/${data.weather[0].main}.jpg`))
             setLoading(false);
             let celsius = Number(data?.main.temp) - 273.15;
@@ -127,7 +128,7 @@ function App() {
             } else if (celsius > 36) {
                 setColorString('red');
             } else if (celsius < 32 && celsius > 25) {
-                setColorString('green');
+                setColorString('white');
 
             } else if (celsius < 25) {
                 setColorString('blue');
@@ -157,28 +158,6 @@ function App() {
         return date.toLocaleDateString('en-IN');
     }
 
-    function parseTime(timestamp) {
-        let date = new Date(timestamp);
-
-        let hours = date.getHours();
-        let minutes = date.getMinutes();
-
-
-        let formattedHours = hours < 10 ? `0${hours}` : hours;
-        let formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-
-
-        let period = hours >= 12 ? 'PM' : 'AM';
-
-
-        if (hours > 12) {
-            formattedHours -= 12;
-        } else if (hours === 0) {
-            formattedHours = 12;
-        }
-
-        return `${formattedHours}:${formattedMinutes} ${period}`;
-    }
 
     function getDayFromDate(timestamp) {
 
@@ -308,7 +287,7 @@ function App() {
 
 
     return (
-        <div className="App">
+        <div className="App" id={'appId'}>
             <img className={'bg-img'} src={bg}/>
 
 
@@ -341,7 +320,12 @@ function App() {
                 }
 
                 {resultWeather && (<>
-                        <h4 className={'city-name'}>{resultWeather?.name}, {resultWeather?.sys.country}</h4>
+                        <div className={'city-name'}>
+                            <img height={25} width={25} src={require('../src/assets/location.png')}/>
+                            <h4>{resultWeather?.name}, {resultWeather?.sys.country}</h4>
+
+                        </div>
+
                         <div className={'info'}>
                             <div className={'wind-div'}>
                                 <div className={'windmill-div'}>
@@ -418,7 +402,12 @@ function App() {
                 <div className={'forecast-div'}>
 
 
-                    <h3 style={{alignSelf: 'center'}} id={'for'}>Forecasts</h3>
+                    <div className={'forecast-heading'}>
+                        <img height={25} width={25} src={require('../src/assets/Forecast.png')}/>
+
+                        <h3 id={'for'}>Forecasts</h3>
+
+                    </div>
 
                     <ul className={'flexCol'}>
                         {groupedArray?.map(item => (
@@ -453,10 +442,21 @@ function App() {
                                             <h5 style={{display: 'flex', flex: 1}}><strong>Low:</strong>
                                                 <AnimatedNumber
                                                     n={getChangedDegree(time.data.main.temp_min)}/>°{degree}</h5>
-                                            <h5 style={{flex: 1}}>{time.data.weather[0].main}</h5>
+
                                             <img style={{width: '50px', height: '50px', marginLeft: '10px'}}
                                                  src={require(`../src/assets/${time.data.weather[0].main}.png`)}
                                                  alt={'weather condition'}/>
+                                            <div className={'weather-variables-item'}>
+                                                <img style={{width: '50px', height: '50px'}}
+                                                     src={require('../src/assets/atmospheric.png')}/>
+                                                <h6>Pressure • {time.data.main.pressure} hPa</h6>
+                                            </div>
+                                            <div className={'weather-variables-item'}>
+                                                <img style={{width: '50px', height: '50px'}}
+                                                     src={require('../src/assets/humidity.png')}/>
+                                                <h6>Humidity • {time.data.main.humidity} %</h6>
+                                            </div>
+
                                         </div>
                                     </div>
 

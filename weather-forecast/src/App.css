@@ -34,11 +34,13 @@
     border-radius: 20px;
     border: none;
     align-self: center;
+    transition: transform 0.2s  ;
 }
 
 .lo-btn:hover {
     cursor: pointer;
     background: linear-gradient(45deg, #f3eb5b, #fff);
+    transform: scale(1.1);
     color: #000;
 
 }
@@ -53,7 +55,7 @@
 
     align-items: center;
     justify-content: center;
-    /*background-color: rgba(24, 76, 120, 0.69);*/
+
 
 
 }
@@ -105,6 +107,7 @@
     color: white;
     font-weight: 900;
 
+background-color: rgba(24, 76, 120, 0.69);
     display: flex;
     flex-direction: column;
 
@@ -133,9 +136,19 @@
 }
 
 .city-name {
-    background: #90796c;
-    padding: 20px;
+    display: flex;
+    flex-direction: row;gap: 10px;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.26);
+    padding-inline: 10px;
     border-radius: 20px;
+    margin-bottom: 20px;
+}
+.forecast-heading{gap: 10px;
+    margin-top: 10px;display: flex;flex-direction: row; align-items: center;
+    justify-content: center;
+    background-color:rgba(0, 0, 0, 0.26);align-self: center;padding-inline:10px;border-radius:10px
 }
 
 .App-link {
@@ -230,11 +243,9 @@
 
 .times {
     display: flex;
+    background: rgba(0, 0, 0, 0.26);
 
     border-radius: 20px;
-
-    border: white 1px solid;
-
 
     width: 100%;
     height: 100%;
@@ -282,7 +293,5 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    border: rgba(97, 218, 251, 0.82) 2px solid;
-    background-color: rgba(97, 218, 251, 0.25);
-    border-radius: 10px;
+
 }
